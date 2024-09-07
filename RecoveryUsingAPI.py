@@ -88,12 +88,11 @@ print('Completed File Saving Workbook')
 try:
     wb.save(filename = parentPath+'complete_'+fileToProcess)
     wb.close()
-    driver.quit()
+    
 except:
     retry ='r'
     while retry =='r':
         wb.save(filename = parentPath+'complete_'+fileToProcess)
         wb.close()
-        driver.quit()
         retry = input("Enter 'r' to retry, any other key to exit: ")
 
