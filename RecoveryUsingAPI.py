@@ -53,21 +53,26 @@ for sheet in wb.sheetnames:
             continue
         
         try:
-            r = requests.post('http://www.lesco.gov.pk:36269/Modules/CustomerBillN/AccountStatus.aspx', data = paramsDict, timeout=1)
+            if batch in [ '24','44','46','27','36']:
+                r = requests.post('http://www.lesco.gov.pk:36269/Modules/CustomerBillN/AccountStatusMDI.aspx', data = paramsDict, timeout=10)
+            else:
+                r = requests.post('http://www.lesco.gov.pk:36269/Modules/CustomerBillN/AccountStatus.aspx', data = paramsDict, timeout=10)
             # r.raise_for_status()
             if r.status_code != requests.codes.ok:
                 print(r.status_code)
-            # print(r.text)
 
             soup = BeautifulSoup(r.content, 'html.parser')
             AccountStatus = soup.find(id="ContentPane")    
 
             k=AccountStatus.find_all('h5')   
             v=AccountStatus.find_all('strong') 
+            if batch in [ '24','44','46','27','36']:
+                v.pop(0)
 
             # zip gives a list of tuples of the nth element of each of the lists. However if the list lengths aren't the same, it goes up to the length of the shortest list.
             # zip('foo', '1234') == [('f', '1'), ('o', '2'), ('o', '3')]
             customerInfo = {ke.text.rstrip(':'): va.text for ke, va in zip(k, v)}
+
             output_txt = 'P='+customerInfo['Amount Paid']
             if output_txt == 'P=0':
                 print("No Payment")
@@ -76,7 +81,8 @@ for sheet in wb.sheetnames:
             output_txt += '  IN '+customerInfo['Bank/Branch']
             ws.cell(row,remarksCol).value = output_txt
             print(output_txt)
-        except:
+        except Exception as e:
+            print(e)
             print('No Data Found')
 
     try:
